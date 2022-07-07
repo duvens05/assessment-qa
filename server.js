@@ -6,10 +6,23 @@ const {shuffleArray} = require('./utils')
 
 app.use(express.json())
 
+// include and initialize the rollbar library with your access token
+var Rollbar = require('rollbar')
+var rollbar = new Rollbar({
+  accessToken: '890500697d714018b39e9cae8e2cb49b',
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+})
+
+// record a generic message and send it to Rollbar
+rollbar.log('Hello world!')
+
 app.get('/', function(req, res) {
+    rollbar.info('user visiting site')
     res.sendFile(path.join(__dirname, 'public/index.html',))
 })
 app.get('/js', function(req, res) {
+    rollbar.info('functions available to visitor')
     res.sendFile(path.join(__dirname, 'public/index.js',))
 })
 app.get('/styles', function(req, res) {
@@ -22,6 +35,7 @@ app.get('/api/robots', (req, res) => {
     try {
         res.status(200).send(botsArr)
     } catch (error) {
+        rollbar.error('/api/robots unable to send bots to front end')
         console.log('ERROR GETTING BOTS', error)
         res.sendStatus(400)
     }
@@ -74,6 +88,7 @@ app.get('/api/player', (req, res) => {
     try {
         res.status(200).send(playerRecord)
     } catch (error) {
+        rollbar.info('cant get players')
         console.log('ERROR GETTING PLAYER STATS', error)
         res.sendStatus(400)
     }
